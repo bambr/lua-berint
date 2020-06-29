@@ -4,21 +4,27 @@
 #include "lua.h"
 #include "lauxlib.h"
 
+#define MAX_BER_LENGTH (sizeof(long) + 1)
+
 static int l_ber2int (lua_State *L) {
     size_t max = 0;
     const char* str = luaL_checklstring(L, 1, &max);
 
     size_t offset = 0;
     if (lua_gettop(L) >= 2) {
-        offset = luaL_checknumber(L, 2) - 1;
+        lua_Integer arg2 = luaL_checkinteger(L, 2);
+        if (arg2 >= 1)
+            offset = arg2 - 1;
+        else
+            luaL_error(L, "bad argument #2 to 'ber2int' (positive integer expected)");
     }
 
-    if (max > offset+9)
-        max = offset+9; // 9 bytes is max BER length for long
+    if (max > offset + MAX_BER_LENGTH)
+        max = offset + MAX_BER_LENGTH;
 
     long val = 0;
 
-    int i = offset;
+    size_t i = offset;
     while (i < max) {
         val <<= 7;
         if (str[i] & 0x80) {
@@ -31,7 +37,7 @@ static int l_ber2int (lua_State *L) {
         }
     }
 
-    if (i-offset == 8 && (str[i] & 0x80)) {
+    if (i-offset == MAX_BER_LENGTH-1 && (str[i] & 0x80)) {
         lua_pushnil(L);
         lua_pushnil(L);
     } else {
@@ -45,7 +51,7 @@ static int l_ber2int (lua_State *L) {
 static int l_int2ber (lua_State *L) {
     long val = luaL_checklong(L, 1);
     if (val >= 0) {
-        unsigned char size = floor(log(val) / log(0x80)) + 1;
+        int size = val ? floor(log(val) / log(0x80)) + 1 : 1;
         char data[size];
 
         if (size == 1)

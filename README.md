@@ -19,5 +19,5 @@ value, offset = berint.ber2int(binary_string, ber_position)
 # BUILD
 
 ```bash
-gcc -lm -shared -fPIC -std=c99 -o berint.so berint.c
+gcc -lm -shared -fPIC -std=c99 -O2 -o berint.so berint.c
 ```

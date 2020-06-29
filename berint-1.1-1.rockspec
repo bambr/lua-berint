@@ -1,9 +1,9 @@
-rockspec_format = "1.0"
+rockspec_format = "1.1"
 package = "berint"
-version = "1.0-1"
+version = "1.1-1"
 source = {
     url = "git://github.com/bambr/lua-berint",
-    tag = "v1.0"
+    tag = "v1.1"
 }
 description = {
     summary = "Encoder and decoder for BER compressed integers",
